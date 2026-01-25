@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Tysiąc - Gra Karciana</title>
+    <style>
+        /* Stylizacja - zielony stół */
+        body {
+            background-color: #2e7d32; /* Butelkowa zieleń */
+            font-family: 'Arial', sans-serif;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { margin-bottom: 30px; }
+
+        /* Kontener na stół */
+        .game-table {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Obszar gracza */
+        .player-area {
+            border: 2px dashed rgba(255,255,255,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            width: 80%;
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        /* Wygląd karty */
+        .hand {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            width: 60px;
+            height: 90px;
+            background-color: white;
+            border-radius: 5px;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* Kolory kart */
+        .red { color: #d32f2f; }
+        .black { color: #212121; }
+
+        /* Mały symbol w rogu */
+        .corner {
+            position: absolute;
+            font-size: 12px;
+            top: 5px;
+            left: 5px;
+        }
+
+        .musik-area {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Gra w Tysiąca</h1>
+<button onclick="startGame()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">ROZDAJ KARTY</button>
+
+<div id="game-board" class="game-table" style="display:none; margin-top: 20px;">
+
+    <div class="musik-area">
+        <h3>Musik (Zakryty, ale my podglądamy)</h3>
+        <div id="musik-cards" class="hand"></div>
+    </div>
+
+    <div id="players-container"></div>
+
+</div>
+
+<script>
+    // Słownik symboli
+    const SUITS = {
+        'HEARTS': '♥',
+        'DIAMONDS': '♦',
+        'CLUBS': '♣',
+        'SPADES': '♠'
+    };
+
+    const RANKS = {
+        'NINE': '9', 'JACK': 'J', 'QUEEN': 'Q', 'KING': 'K', 'TEN': '10', 'ACE': 'A'
+    };
+
+    function isRed(suit) {
+        return suit === 'HEARTS' || suit === 'DIAMONDS';
+    }
+
+    async function startGame() {
+        // 1. Pobieramy dane z Twojego backendu
+        const response = await fetch('/api/game/start'); // <-- To musi pasować do Twojego Controllera
+        const game = await response.json();
+
+        renderGame(game);
+    }
+
+    function renderGame(game) {
+        document.getElementById('game-board').style.display = 'flex';
+
+        // Renderuj Musik
+        const musikDiv = document.getElementById('musik-cards');
+        musikDiv.innerHTML = '';
+        game.musik.forEach(card => {
+            musikDiv.appendChild(createCardElement(card));
+        });
+
+        // Renderuj Graczy
+        const playersDiv = document.getElementById('players-container');
+        playersDiv.innerHTML = ''; // Wyczyść stare
+
+        game.players.forEach(player => {
+            const playerSection = document.createElement('div');
+            playerSection.className = 'player-area';
+            playerSection.style.marginBottom = '20px';
+
+            playerSection.innerHTML = `<h3>${player.name} (Punkty: ${player.score})</h3>`;
+
+            const handDiv = document.createElement('div');
+            handDiv.className = 'hand';
+
+            player.hand.forEach(card => {
+                handDiv.appendChild(createCardElement(card));
+            });
+
+            playerSection.appendChild(handDiv);
+            playersDiv.appendChild(playerSection);
+        });
+    }
+
+    function createCardElement(card) {
+        const el = document.createElement('div');
+        const suitSymbol = SUITS[card.suit];
+        const rankSymbol = RANKS[card.rank];
+        const colorClass = isRed(card.suit) ? 'red' : 'black';
+
+        el.className = `card ${colorClass}`;
+        el.innerHTML = `
+                <div class="corner">${rankSymbol}</div>
+                <div>${suitSymbol}</div>
+            `;
+        return el;
+    }
+</script>
+</body>
+</html>
