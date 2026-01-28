@@ -22,9 +22,7 @@ function App() {
             const response = await fetch(`${API_URL}/api/game/state`);
             if (response.ok) {
                 const data = await response.json();
-                if (data.players && data.players.length > 0) {
-                    setGame(data);
-                }
+                if (data.players && data.players.length > 0) setGame(data);
             }
         } catch (e) { console.error(e); }
     };
@@ -33,239 +31,151 @@ function App() {
         if (!playerName) return;
         try {
             const response = await fetch(`${API_URL}/api/game/join?playerName=${playerName}`, { method: 'POST' });
-            if (response.ok) {
-                setIsLoggedIn(true);
-                fetchGame();
-                setErrorMsg("");
-            } else {
-                const err = await response.json();
-                setErrorMsg(err.message || "Nie można dołączyć (Stół pełny?)");
-            }
-        } catch (e) {
-            setErrorMsg("Błąd połączenia z serwerem");
-        }
+            if (response.ok) { setIsLoggedIn(true); fetchGame(); setErrorMsg(""); }
+            else { const err = await response.json(); setErrorMsg(err.message || "Błąd"); }
+        } catch (e) { setErrorMsg("Błąd serwera"); }
     }
 
     const submitBid = async (amount) => {
-        if (game.players[game.currentPlayerIndex].name !== playerName) {
-            alert("To nie Twoja kolej!"); return;
-        }
-
-        // ZMIANA: Obsługa błędów (np. "Za wysoka licytacja")
-        const response = await fetch(`${API_URL}/api/game/bid?amount=${amount}`, { method: 'POST' });
-
-        if (!response.ok) {
-            const err = await response.json();
-            alert("BŁĄD: " + (err.message || "Nieprawidłowa stawka!"));
-        } else {
-            fetchGame();
-        }
+        if (game.players[game.currentPlayerIndex].name !== playerName) return alert("Nie Twoja kolej!");
+        await fetch(`${API_URL}/api/game/bid?amount=${amount}`, { method: 'POST' });
+        fetchGame();
     }
 
     const playCard = async (rank, suit) => {
-        // 1. ROZDAWANIE (Z wyborem gracza)
         if (game.phase === 'SHARING') {
-            if (game.players[game.currentPlayerIndex].name !== playerName) {
-                alert("To nie Ty wygrałeś licytację!"); return;
-            }
-
-            // Znajdź innych graczy
+            if (game.players[game.currentPlayerIndex].name !== playerName) return alert("Nie Ty rozdajesz!");
             const opponents = game.players.filter(p => p.name !== playerName);
-
-            // Prosty prompt do wyboru (W wersji PRO byłby ładny modal)
-            const targetName = prompt(
-                `Komu oddać ${RANKS[rank]}${SUITS[suit]}?\nWpisz dokładnie nick:\n1. ${opponents[0].name}\n2. ${opponents[1].name}`
-            );
-
-            if (targetName && opponents.some(p => p.name === targetName)) {
+            const targetName = prompt(`Komu oddać ${RANKS[rank]}${SUITS[suit]}?\n1. ${opponents[0].name}\n2. ${opponents[1].name}`);
+            if (targetName) {
                 await fetch(`${API_URL}/api/game/share?rank=${rank}&suit=${suit}&targetPlayer=${targetName}`, { method: 'POST' });
                 fetchGame();
-            } else {
-                alert("Niepoprawny nick gracza!");
             }
             return;
         }
-
-        // 2. Licytacja
-        if (game.phase === 'BIDDING') { alert("Trwa licytacja!"); return; }
-
-        // 3. Gra
-        if (game.players[game.currentPlayerIndex].name !== playerName) {
-            alert("To nie Twoja tura!"); return;
-        }
+        if (game.phase === 'BIDDING') return alert("Trwa licytacja!");
+        if (game.players[game.currentPlayerIndex].name !== playerName) return alert("Nie Twoja tura!");
 
         const response = await fetch(`${API_URL}/api/game/play?rank=${rank}&suit=${suit}`, { method: 'POST' });
-        if (!response.ok) {
-            const errorData = await response.json();
-            alert("BŁĄD: " + (errorData.message || "Błąd ruchu"));
-        } else {
-            // Po udanym ruchu od razu pobierz stan, żeby uniknąć laga
-            fetchGame();
-        }
+        if (!response.ok) { const err = await response.json(); alert(err.message); }
+        else fetchGame();
     };
 
     const isRedSuit = (suit) => (suit === 'HEARTS' || suit === 'DIAMONDS');
 
-    // --- EKRAN LOGOWANIA (LOBBY) ---
+    // --- LOGOWANIE ---
     if (!isLoggedIn) {
         return (
-            <div className="login-screen" style={{textAlign: 'center', marginTop: '50px', color: 'black'}}>
-                <h1 style={{color: 'white'}}>Witaj w Tysiącu!</h1>
-                <div style={{background: 'white', padding: 20, borderRadius: 10, display: 'inline-block'}}>
-                    <input
-                        type="text"
-                        placeholder="Wpisz swój Nick"
-                        value={playerName}
-                        onChange={(e) => setPlayerName(e.target.value)}
-                        style={{padding: '10px', fontSize: '16px'}}
-                    />
-                    <button
-                        onClick={joinGame}
-                        style={{padding: '10px 20px', marginLeft: '10px', background: 'green', color: 'white', border:'none', cursor:'pointer'}}>
-                        DOŁĄCZ DO STOŁU
-                    </button>
-                    {errorMsg && <p style={{color: 'red', marginTop: 10}}>{errorMsg}</p>}
+            <div className="login-overlay">
+                <div className="login-box">
+                    <h2>Witaj w Tysiącu!</h2>
+                    <input type="text" placeholder="Wpisz swój Nick" value={playerName} onChange={e => setPlayerName(e.target.value)} />
+                    <button className="login-btn" onClick={joinGame}>DOŁĄCZ DO STOŁU</button>
+                    {errorMsg && <div style={{color:'red', fontSize:'14px'}}>{errorMsg}</div>}
                 </div>
             </div>
         )
     }
 
-    if (!game || game.players.length < 3) return (
-        <div style={{color:'white', textAlign:'center', marginTop: 50}}>
-            <h2>Czekamy na graczy... ({game ? game.players.length : 0}/3)</h2>
-            <p>Jesteś zalogowany jako: <strong>{playerName}</strong></p>
-        </div>
-    );
+    if (!game || game.players.length < 3) return <div className="login-overlay"><h2 style={{color:'white'}}>Czekanie na graczy... ({game ? game.players.length : 0}/3)</h2></div>;
 
+    // Rozdzielenie graczy
+    const myPlayer = game.players.find(p => p.name === playerName);
+    const opponents = game.players.filter(p => p.name !== playerName);
     const isMyTurn = game.players[game.currentPlayerIndex].name === playerName;
-    const currentBid = game.currentBid || 100;
 
     return (
-        <div className="game-table">
-            <div style={{position: 'absolute', top: 10, left: 10, color: 'white'}}>
-                Grasz jako: <strong>{playerName}</strong>
+        <div className="game-container">
+
+            {/* --- GÓRA: PRZECIWNICY (OBOK SIEBIE) --- */}
+            <div className="opponents-row">
+                {opponents.map((p, i) => (
+                    <div key={i} className="player-zone">
+                        <div className="info-text">{p.name} {game.players[game.currentPlayerIndex].name === p.name ? "🔔" : ""}</div>
+                        <div style={{color:'gold', fontWeight:'bold', marginBottom:5}}>{p.score} pkt</div>
+                        <div className="hand">
+                            {p.hand.map((_, idx) => <div key={idx} className="card back" style={{width:50, height:80}}></div>)}
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            {game.phase === 'PLAYING' && (
-                <div style={{position: 'absolute', top: 20, right: 20, background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '10px'}}>
-                    <small style={{color: 'white'}}>ATUT:</small>
-                    {game.trumpSuit ? (
-                        <div style={{color: isRedSuit(game.trumpSuit) ? '#d32f2f' : 'white', fontSize: '30px'}}>{SUITS[game.trumpSuit]}</div>
-                    ) : (<div style={{color: '#ccc'}}>BRAK</div>)}
-                </div>
-            )}
+            {/* --- ŚRODEK: STÓŁ I MUSIK --- */}
+            <div className="table-area">
 
-            {/* MUSIK */}
-            <div className="section">
-                <h3 style={{color: 'white'}}>Musik</h3>
-                <div className="hand">
-                    {game.musik.map((card, i) => ( <div key={i} className="card back"></div> ))}
+                {/* Musik (widoczny tylko przy licytacji/rozdawaniu) */}
+                {(game.phase === 'BIDDING' || game.phase === 'SHARING') && (
+                    <div className="musik-container">
+                        <div className="info-text" style={{position:'absolute', top:-25, width:'100%', textAlign:'center'}}>Musik</div>
+                        {game.musik.map((c, i) => <div key={i} className="card back"></div>)}
+                    </div>
+                )}
+
+                <div className="center-circle">
+                    {/* INFO O LICYTACJI */}
+                    {game.phase === 'BIDDING' && (
+                        <>
+                            <div className="info-text">💰 LICYTACJA 💰</div>
+                            <div className="info-text" style={{color:'gold', fontSize:24}}>{game.currentBid}</div>
+                            <div className="info-text" style={{fontSize:12}}>Decyduje: {game.players[game.currentPlayerIndex].name}</div>
+                            {isMyTurn && (
+                                <div className="action-buttons">
+                                    <button className="btn-action btn-pass" onClick={() => submitBid(0)}>PAS</button>
+                                    <button className="btn-action btn-bid" onClick={() => submitBid(game.currentBid + 10)}>{game.currentBid + 10}</button>
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* ROZDAWANIE */}
+                    {game.phase === 'SHARING' && (
+                        <>
+                            <div className="info-text">Rozdawanie...</div>
+                            {isMyTurn && <div className="info-text" style={{color:'gold', fontSize:12}}>Wybierz kartę do oddania</div>}
+                        </>
+                    )}
+
+                    {/* DEKLARACJA */}
+                    {game.phase === 'DECLARING' && isMyTurn && (
+                        <button className="btn-action btn-gold" onClick={() => {
+                            const val = prompt("Ile grasz?", game.currentBid);
+                            if(val) fetch(`${API_URL}/api/game/declare?points=${val}`, {method:'POST'}).then(fetchGame);
+                        }}>ZADEKLARUJ</button>
+                    )}
+
+                    {/* KARTY NA STOLE (GRA) */}
+                    {game.phase === 'PLAYING' && (
+                        <div className="played-cards">
+                            {game.table.map((c, i) => (
+                                <div key={i} className={`card ${isRedSuit(c.suit)?'red':'black'}`}>
+                                    <span className="corner">{RANKS[c.rank]}</span>
+                                    <span className="center">{SUITS[c.suit]}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* STÓŁ */}
-            <div className="table-center" style={{
-                minHeight: '160px', margin: '20px auto', border: '2px solid gold', borderRadius: '50%', padding: '20px', width: '350px',
-                display:'flex', justifyContent:'center', alignItems: 'center', gap:'10px', background: 'rgba(0,50,0,0.3)',
-                flexDirection: game.phase === 'PLAYING' ? 'row' : 'column'
-            }}>
-
-                {game.phase === 'BIDDING' && (
-                    <div style={{textAlign: 'center', color: 'white'}}>
-                        <h3>💰 LICYTACJA 💰</h3>
-                        <p>Stawka: <strong style={{color: 'gold', fontSize: '24px'}}>{currentBid}</strong></p>
-                        <p>Decyduje: <strong>{game.players[game.currentPlayerIndex].name}</strong></p>
-
-                        {isMyTurn && (
-                            <div style={{display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'center'}}>
-                                <button onClick={() => submitBid(0)} style={{padding: '10px', background: '#d32f2f', color:'white', border:'none', cursor:'pointer'}}>PAS</button>
-                                <button onClick={() => submitBid(currentBid + 10)} style={{padding: '10px', background: '#388e3c', color:'white', border:'none', cursor:'pointer'}}>{currentBid + 10}</button>
-                            </div>
-                        )}
+            {/* --- DÓŁ: TY --- */}
+            <div className="my-zone">
+                <div className="my-hand-wrapper" style={{borderColor: isMyTurn ? 'gold' : 'transparent'}}>
+                    <div style={{width:'100%', display:'flex', justifyContent:'space-between', marginBottom:10}}>
+                        <span className="info-text" style={{fontSize:18}}>{myPlayer.name} {isMyTurn ? "🔔" : ""}</span>
+                        <span className="info-text" style={{color:'gold'}}>{myPlayer.score} pkt</span>
                     </div>
-                )}
 
-                {game.phase === 'SHARING' && (
-                    <div style={{textAlign: 'center', color: 'white'}}>
-                        <h3>🤝 ROZDAWANIE 🤝</h3>
-                        <p>Wygrał: <strong>{game.players[game.currentPlayerIndex].name}</strong></p>
-                        {isMyTurn ? (
-                            <div style={{color: 'gold', border: '1px dashed gold', padding: 10}}>
-                                Kliknij swoją kartę, a potem wpisz imię gracza, któremu chcesz ją oddać.<br/>
-                                Oddano: {game.cardsGivenCount}/2
-                            </div>
-                        ) : (<p>Czekaj na rozdanie...</p>)}
-                    </div>
-                )}
-
-                {/* WARIANT: DEKLARACJA PUNKTÓW (NOWOŚĆ) */}
-                {/* WARIANT: DEKLARACJA PUNKTÓW */}
-                {game.phase === 'DECLARING' && (
-                    <div style={{textAlign: 'center', color: 'white'}}>
-                        <h3>DEKLARACJA</h3>
-                        <p>Wygrałeś licytację kwotą: <strong>{currentBid}</strong></p>
-                        {isMyTurn ? (
-                            <div style={{background: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 5}}>
-                                <p>Ile chcesz grać?</p>
-                                <button onClick={async () => {
-                                    const newBid = prompt("Podaj ostateczną stawkę (min. " + currentBid + "):", currentBid);
-
-                                    if (newBid && !isNaN(newBid)) {
-                                        // Tu zmieniliśmy na async/await, żeby złapać błąd z backendu
-                                        const response = await fetch(`${API_URL}/api/game/declare?points=${newBid}`, { method: 'POST' });
-
-                                        if (!response.ok) {
-                                            // Jeśli backend rzuci błędem (np. "Za słabe karty"), wyświetlamy go
-                                            const err = await response.json();
-                                            alert("BŁĄD: " + (err.message || "Nieprawidłowa stawka!"));
-                                        } else {
-                                            fetchGame();
-                                        }
-                                    }
-                                }} style={{padding: '10px 20px', background: 'gold', color: 'black', border: 'none', fontWeight: 'bold', cursor: 'pointer'}}>
-                                    USTAL STAWKĘ
-                                </button>
-                            </div>
-                        ) : (
-                            <p>Zwycięzca ustala ostateczną stawkę...</p>
-                        )}
-                    </div>
-                )}
-
-                {game.phase === 'PLAYING' && (
-                    <>
-                        {game.table.map((card, i) => (
-                            <div key={i} className={`card ${isRedSuit(card.suit) ? 'red' : 'black'}`}>
-                                <span className="corner">{RANKS[card.rank] || card.rank}</span>
-                                <span className="center">{SUITS[card.suit] || card.suit}</span>
+                    <div className="hand">
+                        {myPlayer.hand.map((c, i) => (
+                            <div key={i} className={`card ${isRedSuit(c.suit)?'red':'black'}`} onClick={() => playCard(c.rank, c.suit)}>
+                                <span className="corner">{RANKS[c.rank]}</span>
+                                <span className="center">{SUITS[c.suit]}</span>
                             </div>
                         ))}
-                    </>
-                )}
+                    </div>
+                </div>
             </div>
 
-            {/* GRACZE */}
-            <div className="players-container">
-                {game.players.map((player, index) => {
-                    const isCurrent = index === game.currentPlayerIndex;
-                    const isMe = player.name === playerName;
-                    return (
-                        <div key={index} className="player-area" style={{border: isCurrent ? '4px solid gold' : '2px dashed rgba(255,255,255,0.3)', opacity: isCurrent ? 1 : 0.7}}>
-                            <h3 style={{color: 'white'}}>{player.name} {isCurrent ? "🔔" : ""} <span style={{float: 'right', color: 'gold'}}>{player.score} pkt</span></h3>
-                            <div className="hand">
-                                {player.hand.map((card, cIdx) => (
-                                    isMe ? (
-                                        <div key={cIdx} className={`card ${isRedSuit(card.suit) ? 'red' : 'black'}`} onClick={() => playCard(card.rank, card.suit)}>
-                                            <span className="corner">{RANKS[card.rank] || card.rank}</span>
-                                            <span className="center">{SUITS[card.suit] || card.suit}</span>
-                                        </div>
-                                    ) : (<div key={cIdx} className="card back"></div>)
-                                ))}
-                            </div>
-                        </div>
-                    )
-                })}
-            </div>
         </div>
     )
 }

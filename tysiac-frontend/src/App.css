@@ -1,30 +1,17 @@
-/* --- USTAWIENIA GŁÓWNE --- */
-#root {
+/* RESET I TŁO */
+html, body, #root {
+    margin: 0;
+    padding: 0;
     width: 100%;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: #1a1a1a; /* Ciemne tło poza stołem */
-    color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: hidden; /* Zapobiega paskom przewijania na boki */
+    height: 100%;
+    background-color: #2e7d32; /* Cała strona zielona */
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden; /* Blokada scrollowania */
+    user-select: none; /* Żeby nie zaznaczać tekstu przy klikaniu */
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    min-width: 320px;
-    background-color: #1a1a1a;
-}
-
-/* --- EKRAN LOGOWANIA (POPRAWIONY) --- */
-/* Kontener centrujący */
-.login-screen-wrapper {
+/* --- EKRAN LOGOWANIA --- */
+.login-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -33,225 +20,179 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.85); /* Ciemne tło pod spodem */
+    background-color: #2e7d32; /* Zielone tło też pod logowaniem */
     z-index: 1000;
 }
 
-/* Sama puszka logowania */
-.login-screen {
-    background: #ffffff;
-    color: #333;
-    padding: 40px;
+.login-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     width: 100%;
-    max-width: 400px; /* Zgrabna szerokość */
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5); /* Mocny cień */
+    max-width: 320px; /* Małe, zgrabne okienko */
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
 }
 
-.login-screen h2 {
-    margin-top: 0;
-    color: #2e7d32; /* Zielony tytuł */
+.login-box h2 {
+    margin: 0 0 10px 0;
+    color: #333;
 }
 
-.login-screen input {
-    padding: 12px;
-    border: 2px solid #eee;
-    border-radius: 8px;
+.login-box input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
     font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s;
+    text-align: center;
 }
 
-.login-screen input:focus {
-    border-color: #2e7d32;
-}
-
-.login-screen button {
-    padding: 12px;
-    background-color: #2e7d32;
+.login-btn {
+    padding: 10px;
+    background-color: #007e33; /* Ciemniejsza zieleń na guzik */
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 5px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
+.login-btn:hover { background-color: #006428; }
 
-.login-screen button:hover {
-    background-color: #1b5e20;
-}
-
-
-/* --- STÓŁ DO GRY (RESPONSYWNY) --- */
-.game-table {
-    position: relative;
-    /* ZMIANA: Elastyczna szerokość */
-    width: 95%;
-    max-width: 1400px;
-    /* ZMIANA: Większa wysokość minimalna */
-    min-height: 800px;
-    height: 85vh; /* Zajmij 85% wysokości ekranu */
-
-    background-color: #2e7d32;
-    background-image: radial-gradient(circle, #388e3c 0%, #2e7d32 80%); /* Ładniejszy gradient */
-    border: 20px solid #5d4037;
-    border-radius: 40px;
-    box-shadow: inset 0 0 80px rgba(0,0,0,0.6), 0 20px 50px rgba(0,0,0,0.5);
-
+/* --- GŁÓWNY WIDOK GRY --- */
+.game-container {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: space-between; /* Rozrzuca: Przeciwnicy góra, Stół środek, Ty dół */
+    height: 100vh;
     padding: 20px;
     box-sizing: border-box;
-    margin: 20px 0;
 }
 
-/* --- SEKCJE GRY --- */
-.table-center {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column; /* Żeby komunikaty były nad kartami */
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-/* --- PRZECIWNICY (GÓRA) --- */
+/* GÓRA: PRZECIWNICY */
 .opponents-row {
     display: flex;
-    justify-content: center; /* Wyśrodkuj przeciwników */
-    gap: 40px;
-    width: 100%;
-    margin-bottom: 20px;
+    justify-content: center; /* Wyśrodkowani obok siebie */
+    gap: 40px; /* Odstęp między nimi */
+    height: 20%;
 }
 
-/* --- JA (DÓŁ) --- */
-.my-player-row {
-    width: 100%;
+.player-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 200px;
+}
+
+/* ŚRODEK: STÓŁ I MUSIK */
+.table-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Okrąg na środku (opcjonalny, lekko jaśniejszy) */
+.center-circle {
+    width: 300px;
+    height: 180px;
+    border: 2px solid rgba(255, 215, 0, 0.5); /* Złota ramka */
+    border-radius: 50%;
     display: flex;
     justify-content: center;
-    margin-top: auto; /* Wypchnij na sam dół */
-    padding-bottom: 10px;
+    align-items: center;
+    flex-direction: column;
+    background: rgba(0,0,0,0.1);
 }
 
-.player-area {
-    border: 2px dashed rgba(255,255,255,0.2);
-    padding: 15px;
+.musik-container {
+    position: absolute;
+    top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+/* DÓŁ: TY */
+.my-zone {
+    height: 35%; /* Więcej miejsca dla nas */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.my-hand-wrapper {
+    background: rgba(0,0,0,0.2); /* Lekkie tło pod Twoimi kartami */
+    padding: 15px 30px;
     border-radius: 15px;
-    background-color: rgba(0,0,0,0.15);
-    min-width: 200px;
-    transition: all 0.3s ease;
+    border: 2px solid gold; /* Wyróżnienie gracza */
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Specjalny styl dla gracza (Ciebie) - żeby karty miały miejsce */
-.player-area.me {
-    min-width: 400px; /* Szersze pole dla gracza */
-    border-style: solid;
-    border-color: rgba(255,255,255,0.4);
-    background-color: rgba(0,0,0,0.25);
-}
-
-/* Podświetlenie aktywnego gracza */
-.player-area.active {
-    background-color: rgba(255, 215, 0, 0.15);
-    border-color: gold;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-    transform: scale(1.02);
-}
-
+/* KARTY */
 .hand {
     display: flex;
-    gap: 8px; /* Odstęp między kartami */
     justify-content: center;
-    flex-wrap: wrap; /* Karty mogą zawijać, ale... */
-    margin-top: 15px;
-    max-width: 100%;
+    gap: 8px; /* Karty blisko siebie */
 }
 
-/* --- KARTY --- */
 .card {
-    width: 70px;  /* Trochę większe karty */
-    height: 105px;
+    width: 65px;
+    height: 100px;
     background-color: white;
-    color: black;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: 2px 4px 8px rgba(0,0,0,0.4);
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s;
+    font-weight: bold;
+    font-family: serif;
     user-select: none;
-    font-family: 'Times New Roman', serif;
 }
 
-.card:hover {
-    transform: translateY(-20px) scale(1.1); /* Wyraźniejsze uniesienie */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    z-index: 100;
-}
-
+.card:hover { transform: translateY(-15px); z-index: 10; }
+.card.back { background: repeating-linear-gradient(45deg, #1565c0, #1565c0 5px, #0d47a1 5px, #0d47a1 10px); border: 2px solid white; }
 .card.red { color: #d32f2f; }
 .card.black { color: #212121; }
 
-.card.back {
-    background: repeating-linear-gradient(
-            45deg,
-            #1565c0,
-            #1565c0 10px,
-            #0d47a1 10px,
-            #0d47a1 20px
-    );
-    border: 3px solid white;
+.corner { position: absolute; top: 2px; left: 4px; font-size: 14px; }
+.center { font-size: 28px; }
+
+/* KARTY RZUCONE NA STÓŁ */
+.played-cards {
+    display: flex;
+    gap: 20px;
 }
 
-.corner {
-    position: absolute;
-    top: 5px;
-    left: 8px;
-    font-size: 16px;
-    font-weight: bold;
+/* PRZYCISKI AKCJI */
+.action-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
 }
-
-.center {
-    font-size: 32px;
-}
-
-/* --- DROBNE ELEMENTY --- */
-.restart-btn {
-    margin-top: 20px;
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #fdd835;
-    color: #333;
+.btn-action {
+    padding: 8px 16px;
     border: none;
-    border-radius: 50px;
+    border-radius: 4px;
+    cursor: pointer;
     font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: transform 0.2s;
+    color: white;
 }
-.restart-btn:hover {
-    transform: scale(1.05);
-}
+.btn-pass { background: #d32f2f; }
+.btn-bid { background: #007e33; }
+.btn-gold { background: gold; color: black; }
 
-.error {
-    color: #ff5252;
-    background: rgba(0,0,0,0.7);
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    margin-bottom: 10px;
-    border: 1px solid #ff5252;
-}
+.info-text { color: white; margin-bottom: 5px; text-shadow: 1px 1px 2px black; font-weight: bold;}
