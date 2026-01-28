@@ -2,6 +2,7 @@ package com.tysiac.controller;
 
 import com.tysiac.model.Game;
 import com.tysiac.service.GameService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,43 +16,69 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @PostMapping("/join")
-    public Game joinGame(@RequestParam String playerName) {
-        gameService.joinGame(playerName);
-        return gameService.getGame();
-    }
-
+    // 1. POBIERANIE STANU (To jest bezpieczne, zostaje jak było)
     @GetMapping("/state")
     public Game getGameState() {
         return gameService.getGame();
     }
 
+    // 2. RESET (To dodałaś, jest super - zostawiamy!)
+    @PostMapping("/reset")
+    public void resetGame() {
+        System.out.println("--- RESET GRY ---");
+        gameService.resetGame();
+    }
+
+    // --- PONIŻEJ WERSJE "PANCERNE" Z OBSŁUGĄ BŁĘDÓW ---
+    // Dzięki temu React wyświetli "Stół pełny" zamiast się zawiesić.
+
+    @PostMapping("/join")
+    public ResponseEntity<?> joinGame(@RequestParam String playerName) {
+        try {
+            gameService.joinGame(playerName);
+            return ResponseEntity.ok(gameService.getGame());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
     @PostMapping("/play")
-    public Game playCard(@RequestParam String rank, @RequestParam String suit) {
-        gameService.playCard(rank, suit);
-        return gameService.getGame();
+    public ResponseEntity<?> playCard(@RequestParam String rank, @RequestParam String suit) {
+        try {
+            gameService.playCard(rank, suit);
+            return ResponseEntity.ok(gameService.getGame());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
     }
 
     @PostMapping("/bid")
-    public Game bid(@RequestParam int amount) {
-        gameService.bid(amount);
-        return gameService.getGame();
+    public ResponseEntity<?> bid(@RequestParam int amount) {
+        try {
+            gameService.bid(amount);
+            return ResponseEntity.ok(gameService.getGame());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
     }
 
     @PostMapping("/share")
-    public Game shareCard(@RequestParam String rank, @RequestParam String suit, @RequestParam String targetPlayer) {
-        gameService.shareCard(rank, suit, targetPlayer);
-        return gameService.getGame();
+    public ResponseEntity<?> shareCard(@RequestParam String rank, @RequestParam String suit, @RequestParam String targetPlayer) {
+        try {
+            gameService.shareCard(rank, suit, targetPlayer);
+            return ResponseEntity.ok(gameService.getGame());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
     }
 
-    // --- NOWY ENDPOINT ---
     @PostMapping("/declare")
-    public Game declareBid(@RequestParam int points) {
-        gameService.declareBid(points);
-        return gameService.getGame();
-    }
-    @PostMapping("/reset")
-    public void resetGame() {
-        gameService.resetGame();
+    public ResponseEntity<?> declareBid(@RequestParam int points) {
+        try {
+            gameService.declareBid(points);
+            return ResponseEntity.ok(gameService.getGame());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
     }
 }
