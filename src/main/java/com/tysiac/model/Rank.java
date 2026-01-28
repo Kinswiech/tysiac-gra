@@ -1,8 +1,5 @@
 package com.tysiac.model;
 
-import lombok.Getter;
-
-@Getter
 public enum Rank {
     ACE(11),
     TEN(10),
@@ -17,4 +14,8 @@ public enum Rank {
         this.points = points;
     }
 
+    // --- RĘCZNY GETTER (Zamiast Lomboka) ---
+    public int getPoints() {
+        return points;
+    }
 }

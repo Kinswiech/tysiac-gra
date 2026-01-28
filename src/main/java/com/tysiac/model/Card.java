@@ -1,16 +1,33 @@
 package com.tysiac.model;
 
-import lombok.Getter;
+// Zero importów z Lomboka!
 
-@Getter
 public class Card {
-    // --- TE METODY SĄ DLA REACTA (JSON) ---
     private final Rank rank;
     private final Suit suit;
 
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
         this.suit = suit;
+    }
+
+    // --- TE METODY ZASTĘPUJĄ LOMBOKA (Dla Reacta/JSON) ---
+    // Bez nich React nie zobaczy, jaka to karta!
+    public Rank getRank() {
+        return rank;
+    }
+
+    public Suit getSuit() {
+        return suit;
+    }
+
+    // --- TE METODY SĄ DLA GameService (Żeby kod się nie sypał) ---
+    public Rank rank() {
+        return rank;
+    }
+
+    public Suit suit() {
+        return suit;
     }
 
     public int getPoints() {
@@ -22,15 +39,6 @@ public class Card {
             case JACK: return 2;
             default: return 0;
         }
-    }
-
-    // --- TE METODY SĄ DLA GameService (Naprawiają Twój błąd) ---
-    public Rank rank() {
-        return rank;
-    }
-
-    public Suit suit() {
-        return suit;
     }
 
     @Override

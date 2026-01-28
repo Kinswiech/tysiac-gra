@@ -1,51 +1,34 @@
 package com.tysiac.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
-    // Gettery/Settery (Standardowe)
-    @Getter
+    // --- POLA (Czyste, bez adnotacji) ---
     private final List<Player> players;
     private Deck deck;
-    @Getter
     private final List<Card> musik;
-    @Getter
     private final List<Card> table;
 
-    @Setter
-    @Getter
     private int currentPlayerIndex;
-    @Setter
-    @Getter
     private Suit trumpSuit;
-
-    @Setter
-    @Getter
     private GamePhase phase;
-    @Setter
-    @Getter
     private int currentBid;
-    @Setter
-    @Getter
     private int highestBidderIndex;
-    @Getter
     private int passCount;
-    @Getter
     private int cardsGivenCount;
     private int roundStarterIndex = -1;
 
+    // --- KONSTRUKTOR ---
     public Game() {
-        this.players = new ArrayList<>(); // Pusta lista na start!
+        this.players = new ArrayList<>();
         this.musik = new ArrayList<>();
         this.table = new ArrayList<>();
-        this.phase = GamePhase.BIDDING; // Domyślnie
+        this.phase = GamePhase.BIDDING;
     }
 
-    // Metoda dla Service: Dodaj gracza
+    // --- LOGIKA GRY ---
+
     public void addPlayer(String name) {
         if (players.size() >= 3) throw new IllegalStateException("Stół jest pełny!");
         if (players.stream().anyMatch(p -> p.getName().equals(name))) {
@@ -77,15 +60,11 @@ public class Game {
         }
         while(deck.size() > 0) musik.add(deck.dealCard());
 
-        // --- ZMIANA: ROTACJA ROZDAJĄCEGO ---
-        // Zwiększamy indeks startowy o 1 i robimy modulo 3 (żeby po 2 wróciło do 0)
+        // Rotacja rozdającego
         roundStarterIndex = (roundStarterIndex + 1) % 3;
-
-        // Ustawiamy, że teraz licytuje ten, czyja jest kolej
         currentPlayerIndex = roundStarterIndex;
-        // ------------------------------------
 
-        highestBidderIndex = currentPlayerIndex; // Domyślnie startujący jest najwyższym licytującym (na start)
+        highestBidderIndex = currentPlayerIndex;
         currentBid = 100;
         passCount = 0;
         cardsGivenCount = 0;
@@ -99,6 +78,71 @@ public class Game {
 
     public void incrementPassCount() { this.passCount++; }
     public void resetPassCount() { this.passCount = 0; }
-
     public void incrementCardsGivenCount() { this.cardsGivenCount++; }
+
+    // --- GETTERY I SETTERY (Ręczne - to co robił Lombok, ale pewne) ---
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public List<Card> getMusik() {
+        return musik;
+    }
+
+    public List<Card> getTable() {
+        return table;
+    }
+
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
+    }
+
+    public void setCurrentPlayerIndex(int currentPlayerIndex) {
+        this.currentPlayerIndex = currentPlayerIndex;
+    }
+
+    public Suit getTrumpSuit() {
+        return trumpSuit;
+    }
+
+    public void setTrumpSuit(Suit trumpSuit) {
+        this.trumpSuit = trumpSuit;
+    }
+
+    public GamePhase getPhase() {
+        return phase;
+    }
+
+    public void setPhase(GamePhase phase) {
+        this.phase = phase;
+    }
+
+    public int getCurrentBid() {
+        return currentBid;
+    }
+
+    public void setCurrentBid(int currentBid) {
+        this.currentBid = currentBid;
+    }
+
+    public int getHighestBidderIndex() {
+        return highestBidderIndex;
+    }
+
+    public void setHighestBidderIndex(int highestBidderIndex) {
+        this.highestBidderIndex = highestBidderIndex;
+    }
+
+    public int getPassCount() {
+        return passCount;
+    }
+
+    public int getCardsGivenCount() {
+        return cardsGivenCount;
+    }
+
+    public int getRoundStarterIndex() {
+        return roundStarterIndex;
+    }
 }

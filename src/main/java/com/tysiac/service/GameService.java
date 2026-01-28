@@ -1,31 +1,45 @@
 package com.tysiac.service;
 
 import com.tysiac.model.*;
-import lombok.Getter;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@Getter
 public class GameService {
 
     private final Game game = new Game();
 
-    // --- LOBBY ---
-    public void joinGame(String playerName) {
+    // --- GETTER (Ręczny, zamiast Lomboka) ---
+    // To naprawia błąd w kontrolerze i testach
+    public Game getGame() {
+        return game;
+    }
+
+    // --- DODAWANIE GRACZA (Obsługuje Testy i Kontroler) ---
+    public void addPlayer(String playerName) {
+        // 1. Jeśli gra już trwa, nie wpuszczaj nowych
         if (game.isReadyToStart()) {
             boolean exists = game.getPlayers().stream().anyMatch(p -> p.getName().equals(playerName));
             if (!exists) throw new IllegalStateException("Gra jest w toku. Stół pełny.");
             return;
         }
+
+        // 2. Dodaj gracza do modelu
         game.addPlayer(playerName);
+
+        // 3. Sprawdź, czy mamy komplet (3 osoby) -> START
         if (game.isReadyToStart()) {
             game.startNewRound();
             System.out.println("3 graczy zebranych. START!");
         }
     }
 
-    // --- LICYTACJA (Z WALIDACJĄ MAX) ---
+    // Metoda pomocnicza dla Kontrolera (jeśli używa nazwy joinGame)
+    public void joinGame(String playerName) {
+        addPlayer(playerName);
+    }
+
+    // --- LICYTACJA ---
     public void bid(int amount) {
         if (game.getPhase() != GamePhase.BIDDING) throw new IllegalStateException("To nie licytacja!");
 
@@ -51,7 +65,7 @@ public class GameService {
                 throw new IllegalArgumentException("Musisz dać więcej niż " + game.getCurrentBid());
             }
 
-            // 2. NOWOŚĆ: Sprawdź czy ma tyle w kartach (Limit = 120 + Pary w ręku)
+            // 2. Sprawdź limit (120 + Meldunki w ręku)
             Player currentPlayer = game.getPlayers().get(game.getCurrentPlayerIndex());
             int maxPossible = calculateMaxPossibleScore(currentPlayer);
 
@@ -70,7 +84,6 @@ public class GameService {
     private int calculateMaxPossibleScore(Player player) {
         int maxScore = 120; // Zawsze zakładamy, że zgarnie wszystkie lewy
 
-        // Sprawdzamy jakie pary (K+Q) gracz ma FIZYCZNIE w ręku
         if (hasMarriage(player, Suit.HEARTS)) maxScore += 100;
         if (hasMarriage(player, Suit.DIAMONDS)) maxScore += 80;
         if (hasMarriage(player, Suit.CLUBS)) maxScore += 60;
@@ -84,7 +97,6 @@ public class GameService {
         boolean hasQueen = player.getHand().stream().anyMatch(c -> c.suit() == suit && c.rank() == Rank.QUEEN);
         return hasKing && hasQueen;
     }
-    // --------------------------------------------------
 
     // --- ODDAWANIE KART ---
     public void shareCard(String rank, String suit, String targetPlayerName) {
@@ -122,7 +134,6 @@ public class GameService {
 
         if (points < game.getCurrentBid()) throw new IllegalArgumentException("Nie możesz zadeklarować mniej niż wylicytowałeś!");
 
-        // Tu też sprawdzamy MAX (bo po dobraniu musika mógł dostać nowy meldunek!)
         Player winner = game.getPlayers().get(game.getCurrentPlayerIndex());
         int maxPossible = calculateMaxPossibleScore(winner);
         if (points > maxPossible) {
