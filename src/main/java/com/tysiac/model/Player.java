@@ -1,11 +1,22 @@
 package com.tysiac.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class Player {
+
+    // --- TUTAJ DODALIŚMY WALIDACJĘ ---
+    @NotNull(message = "Nick nie może być nullem")
+    @NotBlank(message = "Nick gracza nie może być pusty")
+    @Size(min = 2, max = 20, message = "Nick musi mieć od 2 do 20 znaków")
     private final String name;
+    // ---------------------------------
+
     private final List<Card> hand;
     private int score;
     private int roundScore;

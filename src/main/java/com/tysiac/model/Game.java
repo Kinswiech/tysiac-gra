@@ -36,6 +36,7 @@ public class Game {
     private int passCount;
     @Getter
     private int cardsGivenCount;
+    private int roundStarterIndex = -1;
 
     public Game() {
         this.players = new ArrayList<>(); // Pusta lista na start!
@@ -58,7 +59,7 @@ public class Game {
     }
 
     public void startNewRound() {
-        this.deck = new Deck(); // NOWY deck (reset kart)
+        this.deck = new Deck();
         this.deck.shuffle();
 
         musik.clear();
@@ -76,11 +77,15 @@ public class Game {
         }
         while(deck.size() > 0) musik.add(deck.dealCard());
 
-        // Reset zmiennych rundy
-        // Ważne: Zwycięzca poprzedniej partii powinien zaczynać (na razie upraszczamy: Gracz 0)
-        // W pełnej wersji: rotacja dealera.
-        currentPlayerIndex = 0;
-        highestBidderIndex = 0;
+        // --- ZMIANA: ROTACJA ROZDAJĄCEGO ---
+        // Zwiększamy indeks startowy o 1 i robimy modulo 3 (żeby po 2 wróciło do 0)
+        roundStarterIndex = (roundStarterIndex + 1) % 3;
+
+        // Ustawiamy, że teraz licytuje ten, czyja jest kolej
+        currentPlayerIndex = roundStarterIndex;
+        // ------------------------------------
+
+        highestBidderIndex = currentPlayerIndex; // Domyślnie startujący jest najwyższym licytującym (na start)
         currentBid = 100;
         passCount = 0;
         cardsGivenCount = 0;

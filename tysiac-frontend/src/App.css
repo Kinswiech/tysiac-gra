@@ -1,50 +1,98 @@
+/* --- USTAWIENIA GŁÓWNE (CENTRUM EKRANU) --- */
+#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+
+    /* To centruje aplikację w pionie i poziomie */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
 body {
     margin: 0;
-    background-color: #2e7d32; /* Butelkowa zieleń */
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+    background-color: #242424; /* Ciemne tło "pokoju" */
     color: white;
     font-family: Arial, sans-serif;
 }
 
+/* --- STÓŁ DO GRY (ZIELONY) --- */
 .game-table {
+    position: relative;
+    width: 900px;  /* Szerokość stołu */
+    height: 700px; /* Wysokość stołu */
+    background-color: #2e7d32; /* Butelkowa zieleń (sukno) */
+    border: 15px solid #5d4037; /* Drewniana ramka */
+    border-radius: 50px; /* Zaokrąglone rogi stołu */
+    box-shadow: 0 0 50px rgba(0,0,0,0.8); /* Cień pod stołem */
+
     display: flex;
     flex-direction: column;
+    justify-content: space-between; /* Rozrzuca graczy (góra/dół) */
     align-items: center;
     padding: 20px;
+    box-sizing: border-box; /* Żeby padding nie psuł rozmiaru */
 }
 
+/* --- SEKCJE GRY --- */
 .section {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     text-align: center;
+}
+
+/* Środek stołu (tam gdzie lądują karty) */
+.table-center {
+    flex-grow: 1; /* Zajmuje dostępne miejsce na środku */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 .players-container {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
+    justify-content: space-around; /* Równomiernie rozstaw graczy */
     width: 100%;
+    gap: 20px;
 }
 
 .player-area {
     border: 2px dashed rgba(255,255,255,0.3);
-    padding: 15px;
+    padding: 10px;
     border-radius: 10px;
-    background-color: rgba(0,0,0,0.1);
-    min-width: 300px;
+    background-color: rgba(0,0,0,0.2);
+    min-width: 250px;
+    transition: all 0.3s ease;
+}
+
+/* Podświetlenie aktywnego gracza */
+.player-area[style*="gold"] {
+    background-color: rgba(255, 215, 0, 0.1);
+    transform: scale(1.05);
 }
 
 .hand {
     display: flex;
-    gap: 10px;
+    gap: 5px; /* Mniejszy odstęp żeby karty się mieściły */
     justify-content: center;
     flex-wrap: wrap;
+    margin-top: 10px;
 }
 
+/* --- KARTY (TWOJE STYLE + POPRAWKI) --- */
 .card {
     width: 60px;
     height: 90px;
     background-color: white;
-    color: black; /* <--- DOPISZ TO KONIECZNIE! */
+    color: black;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
@@ -55,27 +103,41 @@ body {
     cursor: pointer;
     transition: transform 0.2s;
     user-select: none;
+    font-weight: bold;
 }
 
 .card:hover {
-    transform: translateY(-10px); /* Karta podskakuje po najechaniu */
+    transform: translateY(-15px) scale(1.1); /* Mocniejszy efekt hover */
+    z-index: 10; /* Karta wychodzi na wierzch */
 }
 
 .card.red { color: #d32f2f; }
 .card.black { color: #212121; }
 
+/* Tył karty (rewers) */
+.card.back {
+    background: repeating-linear-gradient(
+            45deg,
+            #1a237e,
+            #1a237e 10px,
+            #283593 10px,
+            #283593 20px
+    );
+    border: 2px solid white;
+}
+
 .corner {
     position: absolute;
     top: 4px;
     left: 6px;
-    font-weight: bold;
     font-size: 14px;
 }
 
 .center {
-    font-size: 24px;
+    font-size: 28px; /* Większy symbol na środku */
 }
 
+/* --- INNE ELEMENTY --- */
 .restart-btn {
     margin-top: 30px;
     padding: 10px 20px;
@@ -89,7 +151,19 @@ body {
 
 .error {
     color: #ffcdd2;
-    font-size: 20px;
-    margin-top: 50px;
+    background: rgba(255,0,0,0.3);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Ekran logowania */
+.login-screen {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 30px black;
     text-align: center;
 }
