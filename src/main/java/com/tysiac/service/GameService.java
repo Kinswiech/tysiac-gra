@@ -7,34 +7,35 @@ import java.util.List;
 @Service
 public class GameService {
 
-    private final Game game = new Game();
+    // ZMIANA 1: Usunięto 'final', żeby można było zresetować grę
+    private Game game = new Game();
 
-    // --- GETTER (Ręczny, zamiast Lomboka) ---
-    // To naprawia błąd w kontrolerze i testach
+    // ZMIANA 2: Metoda do twardego resetu (dla przycisku)
+    public void resetGame() {
+        this.game = new Game();
+    }
+
+    // --- GETTER (Ręczny) ---
     public Game getGame() {
         return game;
     }
 
-    // --- DODAWANIE GRACZA (Obsługuje Testy i Kontroler) ---
+    // --- DODAWANIE GRACZA ---
     public void addPlayer(String playerName) {
-        // 1. Jeśli gra już trwa, nie wpuszczaj nowych
         if (game.isReadyToStart()) {
             boolean exists = game.getPlayers().stream().anyMatch(p -> p.getName().equals(playerName));
             if (!exists) throw new IllegalStateException("Gra jest w toku. Stół pełny.");
             return;
         }
 
-        // 2. Dodaj gracza do modelu
         game.addPlayer(playerName);
 
-        // 3. Sprawdź, czy mamy komplet (3 osoby) -> START
         if (game.isReadyToStart()) {
             game.startNewRound();
             System.out.println("3 graczy zebranych. START!");
         }
     }
 
-    // Metoda pomocnicza dla Kontrolera (jeśli używa nazwy joinGame)
     public void joinGame(String playerName) {
         addPlayer(playerName);
     }
@@ -60,12 +61,10 @@ public class GameService {
                 game.advanceTurn();
             }
         } else { // PRZEBICIE
-            // 1. Sprawdź czy przebija obecną stawkę
             if (amount <= game.getCurrentBid()) {
                 throw new IllegalArgumentException("Musisz dać więcej niż " + game.getCurrentBid());
             }
 
-            // 2. Sprawdź limit (120 + Meldunki w ręku)
             Player currentPlayer = game.getPlayers().get(game.getCurrentPlayerIndex());
             int maxPossible = calculateMaxPossibleScore(currentPlayer);
 
@@ -80,15 +79,13 @@ public class GameService {
         }
     }
 
-    // --- METODA POMOCNICZA DO OBLICZANIA MAX STAWKI ---
+    // --- HELPERY ---
     private int calculateMaxPossibleScore(Player player) {
-        int maxScore = 120; // Zawsze zakładamy, że zgarnie wszystkie lewy
-
+        int maxScore = 120;
         if (hasMarriage(player, Suit.HEARTS)) maxScore += 100;
         if (hasMarriage(player, Suit.DIAMONDS)) maxScore += 80;
         if (hasMarriage(player, Suit.CLUBS)) maxScore += 60;
         if (hasMarriage(player, Suit.SPADES)) maxScore += 40;
-
         return maxScore;
     }
 

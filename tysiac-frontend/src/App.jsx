@@ -36,6 +36,20 @@ function App() {
         } catch (e) { setErrorMsg("Błąd serwera"); }
     }
 
+    const resetServerGame = async () => {
+        if (!confirm("Czy na pewno chcesz zresetować grę dla WSZYSTKICH?")) return;
+
+        try {
+            await fetch(`${API_URL}/api/game/reset`, { method: 'POST' });
+            // Po resecie na serwerze, czyścimy też nasz stan lokalny
+            setGame(null);
+            setPlayerName("");
+            setIsLoggedIn(false);
+        } catch (e) {
+            alert("Błąd resetowania gry");
+        }
+    }
+
     const submitBid = async (amount) => {
         if (game.players[game.currentPlayerIndex].name !== playerName) return alert("Nie Twoja kolej!");
         await fetch(`${API_URL}/api/game/bid?amount=${amount}`, { method: 'POST' });
@@ -86,6 +100,28 @@ function App() {
 
     return (
         <div className="game-container">
+
+            {/* PRZYCISK RESETU */}
+            <button
+                onClick={resetServerGame}
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    left: '10px',
+                    zIndex: 9999,
+                    background: '#d32f2f', // Czerwony
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 12px',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    opacity: 0.8,
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.5)'
+                }}
+            >
+                🔄 RESET
+            </button>
 
             {/* --- GÓRA: PRZECIWNICY (OBOK SIEBIE) --- */}
             <div className="opponents-row">

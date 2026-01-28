@@ -50,4 +50,8 @@ public class GameController {
         gameService.declareBid(points);
         return gameService.getGame();
     }
+    @PostMapping("/reset")
+    public void resetGame() {
+        gameService.resetGame();
+    }
 }
