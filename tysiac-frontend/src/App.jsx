@@ -38,16 +38,12 @@ function App() {
 
     const resetServerGame = async () => {
         if (!confirm("Czy na pewno chcesz zresetować grę dla WSZYSTKICH?")) return;
-
         try {
             await fetch(`${API_URL}/api/game/reset`, { method: 'POST' });
-            // Po resecie na serwerze, czyścimy też nasz stan lokalny
             setGame(null);
             setPlayerName("");
             setIsLoggedIn(false);
-        } catch (e) {
-            alert("Błąd resetowania gry");
-        }
+        } catch (e) { alert("Błąd resetowania gry"); }
     }
 
     const submitBid = async (amount) => {
@@ -77,7 +73,7 @@ function App() {
 
     const isRedSuit = (suit) => (suit === 'HEARTS' || suit === 'DIAMONDS');
 
-    // --- LOGOWANIE ---
+    // --- EKRAN LOGOWANIA ---
     if (!isLoggedIn) {
         return (
             <div className="login-overlay">
@@ -93,7 +89,6 @@ function App() {
 
     if (!game || game.players.length < 3) return <div className="login-overlay"><h2 style={{color:'white'}}>Czekanie na graczy... ({game ? game.players.length : 0}/3)</h2></div>;
 
-    // Rozdzielenie graczy
     const myPlayer = game.players.find(p => p.name === playerName);
     const opponents = game.players.filter(p => p.name !== playerName);
     const isMyTurn = game.players[game.currentPlayerIndex].name === playerName;
@@ -101,29 +96,41 @@ function App() {
     return (
         <div className="game-container">
 
-            {/* PRZYCISK RESETU */}
+            {/* 1. PRZYCISK RESETU (LEWY GÓRNY RÓG) */}
             <button
                 onClick={resetServerGame}
                 style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '10px',
-                    zIndex: 9999,
-                    background: '#d32f2f', // Czerwony
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 12px',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    opacity: 0.8,
+                    position: 'absolute', top: '15px', left: '15px', zIndex: 9999,
+                    background: '#d32f2f', color: 'white', border: 'none',
+                    padding: '8px 12px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold',
                     boxShadow: '0 2px 5px rgba(0,0,0,0.5)'
                 }}
             >
                 🔄 RESET
             </button>
 
-            {/* --- GÓRA: PRZECIWNICY (OBOK SIEBIE) --- */}
+            {/* 2. WSKAŹNIK ATUTU (NOWOŚĆ - PRAWY GÓRNY RÓG) */}
+            <div style={{
+                position: 'absolute', top: '15px', right: '15px', zIndex: 9999,
+                background: 'rgba(0,0,0,0.4)', padding: '10px 20px', borderRadius: '10px',
+                textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+                <div style={{fontSize:'12px', color:'#ddd', marginBottom:'5px', textTransform:'uppercase'}}>Atut</div>
+                {game.trumpSuit ? (
+                    <div style={{
+                        fontSize: '40px',
+                        lineHeight: '40px',
+                        textShadow: '0 2px 5px rgba(0,0,0,0.5)',
+                        color: isRedSuit(game.trumpSuit) ? '#ff5252' : 'white'
+                    }}>
+                        {SUITS[game.trumpSuit]}
+                    </div>
+                ) : (
+                    <div style={{fontSize:'16px', color:'#aaa', fontWeight:'bold'}}>BRAK</div>
+                )}
+            </div>
+
+            {/* --- GÓRA: PRZECIWNICY --- */}
             <div className="opponents-row">
                 {opponents.map((p, i) => (
                     <div key={i} className="player-zone">
@@ -138,8 +145,6 @@ function App() {
 
             {/* --- ŚRODEK: STÓŁ I MUSIK --- */}
             <div className="table-area">
-
-                {/* Musik (widoczny tylko przy licytacji/rozdawaniu) */}
                 {(game.phase === 'BIDDING' || game.phase === 'SHARING') && (
                     <div className="musik-container">
                         <div className="info-text" style={{position:'absolute', top:-25, width:'100%', textAlign:'center'}}>Musik</div>
@@ -148,7 +153,6 @@ function App() {
                 )}
 
                 <div className="center-circle">
-                    {/* INFO O LICYTACJI */}
                     {game.phase === 'BIDDING' && (
                         <>
                             <div className="info-text">💰 LICYTACJA 💰</div>
@@ -163,7 +167,6 @@ function App() {
                         </>
                     )}
 
-                    {/* ROZDAWANIE */}
                     {game.phase === 'SHARING' && (
                         <>
                             <div className="info-text">Rozdawanie...</div>
@@ -171,7 +174,6 @@ function App() {
                         </>
                     )}
 
-                    {/* DEKLARACJA */}
                     {game.phase === 'DECLARING' && isMyTurn && (
                         <button className="btn-action btn-gold" onClick={() => {
                             const val = prompt("Ile grasz?", game.currentBid);
@@ -179,7 +181,6 @@ function App() {
                         }}>ZADEKLARUJ</button>
                     )}
 
-                    {/* KARTY NA STOLE (GRA) */}
                     {game.phase === 'PLAYING' && (
                         <div className="played-cards">
                             {game.table.map((c, i) => (
