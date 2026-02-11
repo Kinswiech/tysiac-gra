@@ -1,9 +1,9 @@
 package com.tysiac.model;
 
 public enum GamePhase {
-    BIDDING, // Licytacja
+    BIDDING,
     SHARING,
-    DECLARING,// Nowy etap: Rozdawanie nadmiarowych kart
+    DECLARING,
     PLAYING,
     GAME_OVER
 }

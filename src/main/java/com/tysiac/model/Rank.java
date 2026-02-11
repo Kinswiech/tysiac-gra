@@ -1,5 +1,6 @@
 package com.tysiac.model;
 
+//definicja kart
 public enum Rank {
     ACE(11),
     TEN(10),
@@ -14,7 +15,6 @@ public enum Rank {
         this.points = points;
     }
 
-    // --- RĘCZNY GETTER (Zamiast Lomboka) ---
     public int getPoints() {
         return points;
     }

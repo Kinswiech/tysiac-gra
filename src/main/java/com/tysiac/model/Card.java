@@ -1,18 +1,16 @@
 package com.tysiac.model;
 
-// Zero importów z Lomboka!
-
+//klasa karta
 public class Card {
     private final Rank rank;
     private final Suit suit;
 
+    //kostruktor tworzenia nowej karty
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
         this.suit = suit;
     }
 
-    // --- TE METODY ZASTĘPUJĄ LOMBOKA (Dla Reacta/JSON) ---
-    // Bez nich React nie zobaczy, jaka to karta!
     public Rank getRank() {
         return rank;
     }
@@ -21,7 +19,6 @@ public class Card {
         return suit;
     }
 
-    // --- TE METODY SĄ DLA GameService (Żeby kod się nie sypał) ---
     public Rank rank() {
         return rank;
     }
@@ -30,6 +27,7 @@ public class Card {
         return suit;
     }
 
+    //metoda do zwracania liczby punktów do każdej karty
     public int getPoints() {
         switch (rank) {
             case ACE: return 11;

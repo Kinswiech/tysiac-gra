@@ -8,15 +8,16 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+//klasa do gracza
 public class Player {
 
-    // --- TUTAJ DODALIŚMY WALIDACJĘ ---
+    //Walidacja
     @NotNull(message = "Nick nie może być nullem")
     @NotBlank(message = "Nick gracza nie może być pusty")
     @Size(min = 2, max = 20, message = "Nick musi mieć od 2 do 20 znaków")
     private final String name;
-    // ---------------------------------
 
+    //stan gracza
     private final List<Card> hand;
     private int score;
     private int roundScore;
@@ -28,22 +29,26 @@ public class Player {
         this.roundScore = 0;
     }
 
+    //metoda do rozdawania kart do ręki
     public void receiveCard(Card card) {
         hand.add(card);
-        sortHand(); // Sortujemy od razu przy dodaniu
+        sortHand();
     }
 
-    // --- SORTOWANIE (Serce -> Pik, As -> 9) ---
+    //sortowanie kart kolorem i wielkością
     public void sortHand() {
         hand.sort(Comparator
-                .comparing(Card::suit) // Najpierw kolor (według kolejności w Enumie Suit)
-                .thenComparing(Card::rank) // Potem figura (według kolejności w Enumie Rank)
+                .comparing(Card::suit)
+                .thenComparing(Card::rank)
         );
     }
 
+    //dodanie punktów za lewę lub meldunek
     public void addRoundPoints(int points) { this.roundScore += points; }
+    //zerowanie punktów rundy
     public void resetRoundScore() { this.roundScore = 0; }
 
+    //gettery i settery
     public String getName() { return name; }
     public List<Card> getHand() { return hand; }
     public int getScore() { return score; }

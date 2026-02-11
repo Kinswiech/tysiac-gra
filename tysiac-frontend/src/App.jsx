@@ -73,7 +73,6 @@ function App() {
 
     const isRedSuit = (suit) => (suit === 'HEARTS' || suit === 'DIAMONDS');
 
-    // --- EKRAN LOGOWANIA ---
     if (!isLoggedIn) {
         return (
             <div className="login-overlay">
@@ -96,7 +95,6 @@ function App() {
     return (
         <div className="game-container">
 
-            {/* 1. PRZYCISK RESETU (LEWY GÓRNY RÓG) */}
             <button
                 onClick={resetServerGame}
                 style={{
@@ -109,7 +107,6 @@ function App() {
                 🔄 RESET
             </button>
 
-            {/* 2. WSKAŹNIK ATUTU (NOWOŚĆ - PRAWY GÓRNY RÓG) */}
             <div style={{
                 position: 'absolute', top: '15px', right: '15px', zIndex: 9999,
                 background: 'rgba(0,0,0,0.4)', padding: '10px 20px', borderRadius: '10px',

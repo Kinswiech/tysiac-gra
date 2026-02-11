@@ -16,22 +16,20 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    // 1. POBIERANIE STANU (To jest bezpieczne, zostaje jak było)
+    //Pobieranie stanu
     @GetMapping("/state")
     public Game getGameState() {
         return gameService.getGame();
     }
 
-    // 2. RESET (To dodałaś, jest super - zostawiamy!)
+    //reset gry
     @PostMapping("/reset")
     public void resetGame() {
         System.out.println("--- RESET GRY ---");
         gameService.resetGame();
     }
 
-    // --- PONIŻEJ WERSJE "PANCERNE" Z OBSŁUGĄ BŁĘDÓW ---
-    // Dzięki temu React wyświetli "Stół pełny" zamiast się zawiesić.
-
+    //dołączenie gracza do gry
     @PostMapping("/join")
     public ResponseEntity<?> joinGame(@RequestParam String playerName) {
         try {
@@ -42,6 +40,7 @@ public class GameController {
         }
     }
 
+    //rzucenie karty
     @PostMapping("/play")
     public ResponseEntity<?> playCard(@RequestParam String rank, @RequestParam String suit) {
         try {
@@ -52,6 +51,7 @@ public class GameController {
         }
     }
 
+    //Obsługa zgłoszania stawki lub pasowanie
     @PostMapping("/bid")
     public ResponseEntity<?> bid(@RequestParam int amount) {
         try {
@@ -62,6 +62,7 @@ public class GameController {
         }
     }
 
+    //oddawanie kart z musika
     @PostMapping("/share")
     public ResponseEntity<?> shareCard(@RequestParam String rank, @RequestParam String suit, @RequestParam String targetPlayer) {
         try {
@@ -72,6 +73,7 @@ public class GameController {
         }
     }
 
+    //ustalanie ostatecznej deklaracji punktów
     @PostMapping("/declare")
     public ResponseEntity<?> declareBid(@RequestParam int points) {
         try {

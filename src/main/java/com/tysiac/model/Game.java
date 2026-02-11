@@ -4,22 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
-    // --- POLA (Czyste, bez adnotacji) ---
+    //pola przechowujące stan
     private final List<Player> players;
     private Deck deck;
     private final List<Card> musik;
     private final List<Card> table;
 
+    //zmienne sterujące rozgrywką
     private int currentPlayerIndex;
     private Suit trumpSuit;
     private GamePhase phase;
+    //zmienne licytacji
     private int currentBid;
     private int highestBidderIndex;
     private int passCount;
+    //zmienne pomocnicze
     private int cardsGivenCount;
     private int roundStarterIndex = -1;
 
-    // --- KONSTRUKTOR ---
+    //inicjalizacja pustych list
     public Game() {
         this.players = new ArrayList<>();
         this.musik = new ArrayList<>();
@@ -27,8 +30,8 @@ public class Game {
         this.phase = GamePhase.BIDDING;
     }
 
-    // --- LOGIKA GRY ---
 
+    //dodanie gracza do stolika
     public void addPlayer(String name) {
         if (players.size() >= 3) throw new IllegalStateException("Stół jest pełny!");
         if (players.stream().anyMatch(p -> p.getName().equals(name))) {
@@ -37,10 +40,11 @@ public class Game {
         players.add(new Player(name));
     }
 
+    //sprawdzanie czy jest komplet
     public boolean isReadyToStart() {
         return players.size() == 3;
     }
-
+   //start nowej rundy
     public void startNewRound() {
         this.deck = new Deck();
         this.deck.shuffle();
@@ -52,7 +56,7 @@ public class Game {
             p.resetRoundScore();
         });
 
-        // Rozdajemy karty
+        //Rozdajemy karty
         for (Player player : players) {
             for (int i = 0; i < 7; i++) {
                 player.receiveCard(deck.dealCard());
@@ -60,7 +64,7 @@ public class Game {
         }
         while(deck.size() > 0) musik.add(deck.dealCard());
 
-        // Rotacja rozdającego
+        //Rotacja rozdającego
         roundStarterIndex = (roundStarterIndex + 1) % 3;
         currentPlayerIndex = roundStarterIndex;
 
@@ -80,8 +84,8 @@ public class Game {
     public void resetPassCount() { this.passCount = 0; }
     public void incrementCardsGivenCount() { this.cardsGivenCount++; }
 
-    // --- GETTERY I SETTERY (Ręczne - to co robił Lombok, ale pewne) ---
 
+    //GETTERY I SETTERY
     public List<Player> getPlayers() {
         return players;
     }
